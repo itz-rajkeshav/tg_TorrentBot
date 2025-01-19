@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const token = process.env.TOKEN;
+const callbackDataMap = new Map(); // Added missing Map declaration
 
 if (!token) {
   console.error('Telegram token not found in environment variables');
@@ -16,49 +17,57 @@ const bot = new TelegramBot(token, { polling: true });
 
 async function searchMovie(movieName) {
   try {
-      // Format the movie name for the URL
-      const formattedName = movieName.replace(/\s+/g, '+');
-      console.log('Searching for:', formattedName);
+    const formattedName = movieName.replace(/\s+/g, '+');
+    console.log('Searching for:', formattedName);
 
-      const config = {
-          method: 'get',
-          maxBodyLength: Infinity,
-          url: `https://www.1337x.to/search/${formattedName}/1/`,
-          headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
-          }
-      };
+    const config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://www.1337x.to/search/${formattedName}/1/`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+      }
+    };
 
-      const response = await axios.request(config);
+    const response = await axios.request(config);
+    const $ = cheerio.load(response.data);
 
-      const $ = cheerio.load(response.data);
+    const torrents = [];
+    $('table.table-list tbody tr').each((index, element) => {
+      const nameColumn = $(element).find('td.coll-1.name');
+      const torrentLink = $(element).find('td.coll-1.name a:nth-child(2)').attr('href');
+      
+      // Extract torrent ID using regex
+      const torrentId = torrentLink.match(/\/torrent\/(\d+)\//)?.[1];
+      
+      const name = $(element).find('td.coll-1.name a:nth-child(2)').text().trim();
+      const seeds = $(element).find('td.coll-2.seeds').text().trim();
+      const leeches = $(element).find('td.coll-3.leeches').text().trim();
+      const time = $(element).find('td.coll-date').text().trim();
+      const size = $(element).find('td.coll-4.size').text().trim();
 
-      const pageTitle = $('title').text();
-      // console.log('Page Title:', pageTitle);
+      if (torrentId) {
+        torrents.push({
+          torrentId, 
+          name,
+          torrentLink: 'https://1337x.to' + torrentLink,
+          seeds,
+          leeches,
+          time,
+          size,
+        });
+      }
+    });
 
-      const searchFormAction = $('#search-form').attr('action');
-      // console.log('Search Form Action URL:', searchFormAction);
-      const torrents = [];
-      $('table.table-list tbody tr').each((index, element) => {
-          const name = $(element).find('td.coll-1.name a').text().trim();
-          const seeds = $(element).find('td.coll-2.seeds').text().trim();
-          const leeches = $(element).find('td.coll-3.leeches').text().trim();
-          const time = $(element).find('td.coll-date').text().trim();
-          const size = $(element).find('td.coll-4.size').text().trim();
-          torrents.push({ name, seeds, leeches, time, size });
-      });
-
-      // console.log('Torrents:', torrents);
-
-      return torrents;
+    return torrents;
 
   } catch (error) {
-      console.error('Error details:', {
-          message: error.message,
-          response: error.response?.status,
-          data: error.response?.data,
-      });
-      throw new Error('Failed to fetch movie data');
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response?.status,
+      data: error.response?.data,
+    });
+    throw new Error('Failed to fetch movie data');
   }
 }
 
@@ -66,10 +75,28 @@ const commands = [
   { command: 'start', description: 'Start the bot' },
   { command: 'help', description: 'Show available commands' },
   { command: 'search', description: 'Search for a movie. Usage: /search <movie name>' },
+  { command: 'contact', description: 'Get developer contact information' },
 ];
 
 bot.setMyCommands(commands).catch(console.error);
+bot.onText(/\/contact/, async (msg) => {
+  const chatId = msg.chat.id;
 
+  try {
+    await bot.sendChatAction(chatId, 'typing');
+    const contactMessage = 
+      '👨‍💻 *Developer Contact Information*\n\n' +
+      '• GitHub: [itz-rajkeshav](https://github.com/itz-rajkeshav)\n' +
+      '\nFeel free to reach out for any questions or suggestions!';
+
+    await bot.sendMessage(chatId, contactMessage, {
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true
+    });
+  } catch (error) {
+    console.error('Error in contact command:', error);
+  }
+});
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
   const username = msg.from?.first_name || 'there';
@@ -129,37 +156,78 @@ bot.onText(/\/search(.+)/, async (msg, match) => {
       return;
     }
 
-    // Use for...of instead of forEach for async operations
-    for (const torrent of movies.slice(0, 7)) {
+    for (const [index, torrent] of movies.slice(0, 7).entries()) {
+      const callbackId = `torrent_${index}_${Date.now()}`;
+      callbackDataMap.set(callbackId, torrent);
+      
       const message =
         `🎬 <b>${torrent.name}</b>\n` +
         `🌱 Seeds: ${torrent.seeds}\n` +
         `🌊 Leeches: ${torrent.leeches}\n` +
         `⏰ Time: ${torrent.time}\n` +
-        `📦 Size: ${torrent.size}\n` +
-        // `👤 Uploader: ${torrent.uploader}\n\n` +
-        // `🔗 <a href="${torrent.torrentLink}">Get Torrent</a>`;
-        // let inlineKeyboard = {
-        //   inline_keyboard: [
-        //     [
-        //       {
-        //         text: 'Get Torrent',
-        //         callback_data: JSON.stringify({
-        //           action: 'get_torrent',
-        //           torrentLink: torrent.torrentLink, // Assuming this is available
-        //         }),
-        //       },
-        //     ],
-        //   ],
-        // };
+        `📦 Size: ${torrent.size}\n`;
 
-      await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
+      const inlineKeyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: '📥 Get Torrent',
+              callback_data: callbackId,
+            }
+          ]
+        ]
+      };
+      
+      await bot.sendMessage(chatId, message, {
+        parse_mode: 'HTML',
+        reply_markup: inlineKeyboard
+      });
     }
   } catch (error) {
     console.error('Error processing search:', error);
     await bot.sendMessage(
       chatId,
       '❌ Sorry, there was an error processing your request. Please try again later.'
+    );
+  }
+});
+
+bot.on('callback_query', async (callbackQuery) => {
+  const callbackId = callbackQuery.data;
+  const chatId = callbackQuery.message.chat.id;
+
+  try {
+    const torrent = callbackDataMap.get(callbackId);
+    if (torrent) {
+      await bot.answerCallbackQuery(callbackQuery.id);
+      const formattedName = torrent.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const torrentUrl = `https://www.1337x.to/torrent/6297321/${formattedName}/`;
+      const response = await axios.get(torrentUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        }
+      });
+
+      const $ = cheerio.load(response.data);
+      const magnetLink = $('a[href^="magnet:?"]').attr('href');
+
+      await bot.sendMessage(
+        chatId,
+        `🎬 <b>${torrent.name}</b>\n\n` +
+        `📦<b> size:${torrent.size}</b>\n\n`+
+        `🔗 <code>${magnetLink}</code>`,
+        { parse_mode: 'HTML' }
+      );
+
+      callbackDataMap.delete(callbackId);
+    } else {
+      await bot.answerCallbackQuery(callbackQuery.id, { text: 'Torrent data not found. Please try searching again.' });
+    }
+  } catch (error) {
+    console.error('Error handling callback query:', error);
+    await bot.sendMessage(
+      chatId,
+      '❌ Sorry, there was an error retrieving the torrent information. Please try again.'
     );
   }
 });
@@ -178,14 +246,13 @@ bot.on('message', async (msg) => {
       chatId,
       '❓ To search for a movie, use the /search command followed by the movie name.\n' +
       'Example: /search Inception\n\n' +
-      'Type /help to see all available commands.'
+      'Type /help to see all available commands.\n',
     );
   } catch (error) {
     console.error('Error handling message:', error);
   }
 });
 
-// Handle polling errors
 bot.on('polling_error', (error) => {
   console.error('Polling error:', error);
 });
