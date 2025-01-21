@@ -47,12 +47,7 @@ This is a Telegram bot that allows users to search for movies and retrieve torre
 ## Deployment
 
 To deploy your bot, you can use services like:
-
-- [Vercel](https://vercel.com)
-- [Railway](https://railway.app)
-- [Heroku](https://www.heroku.com)
-
-Ensure that your environment variables are properly set on the deployment platform.
+use your own server ..or deploy through using proxy
 
 ## Troubleshooting
 
