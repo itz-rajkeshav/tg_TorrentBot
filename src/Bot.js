@@ -57,9 +57,10 @@ async function searchMovie(movieName) {
           size,
         });
       }
+      // console.log(torrentId);
     });
-
-    return torrents;
+    
+        return torrents;
 
   } catch (error) {
     console.error('Error details:', {
@@ -157,8 +158,10 @@ bot.onText(/\/search(.+)/, async (msg, match) => {
     }
 
     for (const [index, torrent] of movies.slice(0, 7).entries()) {
-      const callbackId = `torrent_${index}_${Date.now()}`;
+      const callbackId = `torrent_${index}`;
+      // console.log(callbackId);
       callbackDataMap.set(callbackId, torrent);
+      // console.log(callbackDataMap);
       
       const message =
         `🎬 <b>${torrent.name}</b>\n` +
@@ -177,6 +180,7 @@ bot.onText(/\/search(.+)/, async (msg, match) => {
           ]
         ]
       };
+      // console.log(callback_data);
       
       await bot.sendMessage(chatId, message, {
         parse_mode: 'HTML',
@@ -195,13 +199,17 @@ bot.onText(/\/search(.+)/, async (msg, match) => {
 bot.on('callback_query', async (callbackQuery) => {
   const callbackId = callbackQuery.data;
   const chatId = callbackQuery.message.chat.id;
-
+  // console.log(`callbackId ${callbackId}`);
+  // console.log(`data${chatId}`);
+  
   try {
     const torrent = callbackDataMap.get(callbackId);
     if (torrent) {
       await bot.answerCallbackQuery(callbackQuery.id);
       const formattedName = torrent.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const torrentUrl = `https://www.1337x.to/torrent/6297321/${formattedName}/`;
+      const torrentUrl = `https://www.1337x.to/torrent/${torrent.torrentId}/${formattedName}/`;
+      // console.log(torrentUrl);
+      
       const response = await axios.get(torrentUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
