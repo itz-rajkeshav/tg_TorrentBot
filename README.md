@@ -2,6 +2,11 @@
 
 This is a Telegram bot that allows users to search for movies and retrieve torrent links using the 1337x website. The bot fetches search results and provides torrent details, including seeds, leeches, size, and download links.
 
+
+👉 [Click here to chat with the bot](https://t.me/@get_cinemaBot)
+
+Or search for `@get_cinemaBot` in Telegram.
+
 ## Features
 
 - Search for movies using the `/search` command.
