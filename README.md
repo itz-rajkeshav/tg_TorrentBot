@@ -1,7 +1,22 @@
-# Telegram Movie Search Bot
+<div align="center" class="text-center" bis_skin_checked="1">
+<h1>TG_TORRENTBOT</h1>
+<p><em>Discover movies effortlessly, download torrents instantly.</em></p>
 
-This is a Telegram bot that allows users to search for movies and retrieve torrent links using the 1337x website. The bot fetches search results and provides torrent details, including seeds, leeches, size, and download links.
-
+<img alt="last-commit" src="https://img.shields.io/github/last-commit/itz-rajkeshav/tg_TorrentBot?style=flat&amp;logo=git&amp;logoColor=white&amp;color=0080ff" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="repo-top-language" src="https://img.shields.io/github/languages/top/itz-rajkeshav/tg_TorrentBot?style=flat&amp;color=0080ff" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="repo-language-count" src="https://img.shields.io/github/languages/count/itz-rajkeshav/tg_TorrentBot?style=flat&amp;color=0080ff" class="inline-block mx-1" style="margin: 0px 2px;">
+<p><em>Built with the tools and technologies:</em></p>
+<img alt="Express" src="https://img.shields.io/badge/Express-000000.svg?style=flat&amp;logo=Express&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="JSON" src="https://img.shields.io/badge/JSON-000000.svg?style=flat&amp;logo=JSON&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Markdown" src="https://img.shields.io/badge/Markdown-000000.svg?style=flat&amp;logo=Markdown&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="npm" src="https://img.shields.io/badge/npm-CB3837.svg?style=flat&amp;logo=npm&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Cheerio" src="https://img.shields.io/badge/Cheerio-E88C1F.svg?style=flat&amp;logo=Cheerio&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<br>
+<img alt=".ENV" src="https://img.shields.io/badge/.ENV-ECD53F.svg?style=flat&amp;logo=dotenv&amp;logoColor=black" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=flat&amp;logo=JavaScript&amp;logoColor=black" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Nodemon" src="https://img.shields.io/badge/Nodemon-76D04B.svg?style=flat&amp;logo=Nodemon&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+<img alt="Axios" src="https://img.shields.io/badge/Axios-5A29E4.svg?style=flat&amp;logo=Axios&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
+</div>
 
 👉 [Click here to chat with the bot](https://t.me/@get_cinemaBot)
 
